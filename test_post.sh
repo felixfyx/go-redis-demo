@@ -1,0 +1,1 @@
+curl -d '{"name":"hello", "email":"world"}' -H "Content-Type: application/json" -X POST localhost:3000

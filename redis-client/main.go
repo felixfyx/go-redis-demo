@@ -6,6 +6,7 @@ import (
 	"fmt"
 
 	"github.com/redis/go-redis/v9"
+	"github.com/spf13/viper"
 )
 
 type User struct {
@@ -13,13 +14,26 @@ type User struct {
 	Email string `json:"email"`
 }
 
-var redisClient = redis.NewClient(&redis.Options{
-	Addr: "localhost:6379",
-})
-
 var ctx = context.Background()
 
 func main() {
+	fmt.Println("Reading config...")
+	viper.SetConfigName("config")
+	viper.SetConfigType("yml")
+	viper.AddConfigPath("../config")
+	if err := viper.ReadInConfig(); err != nil {
+		fmt.Printf("Error reading config file, %s", err)
+	}
+
+	// Create redisClient
+	var host = viper.GetString("server.host")
+	var port = viper.GetString("server.port")
+	var redisClient = redis.NewClient(&redis.Options{
+		Addr: host + ":" + port,
+	})
+
+	fmt.Println("Running client...")
+
 	subscriber := redisClient.Subscribe(ctx, "send-user-data")
 
 	user := User{}
